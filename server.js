@@ -1,0 +1,100 @@
+const sharp = require('sharp');
+const fs = require('fs');
+const imageBase64 = require('./imagedata.js')
+
+
+//converting base64 image to buffer
+let inputImageBuffer = Buffer.from(imageBase64, 'base64');
+const filepath = "./images";
+
+
+//defining important variables for edgeDetection
+const options = {
+    lowThreshold: 10,  // Lower threshold for edge detection
+    highThreshold: 50, // Higher threshold for edge detection
+};
+
+//function to saving data from buffer to folder
+function saveImage(inputImageBuffer, filepath, filename){
+    fs.writeFile(`${filepath}/${filename}.png`, inputImageBuffer, (err) => {
+        if (err) {
+            console.log("Error occured while writing image to folder name images from buffer");
+            console.log("Error : ", err);
+        } else {
+            console.log("Image saved successfully");
+        }
+    });
+}
+
+
+//writing function to implement image filteration(grayscale conversion)
+async function grayScaleConvertion(inputImageBuffer) {
+    try{
+        const outputImageBuffer = await sharp(inputImageBuffer).grayscale().toBuffer();
+        outputImageBuffer.copy(inputImageBuffer);
+    }catch(err){
+        console.log("Error occured while converting image to grayscale");
+        console.log("Error : ", err);
+        throw err;
+    }
+}
+
+//writing function to implement image filteration(brightnessAdjustment)
+async function brightnessAjdustment(inputImageBuffer, brightnessLevel){
+    try{
+        const outputImageBuffer = await sharp(inputImageBuffer).modulate({ brightness: brightnessLevel}).toBuffer();
+        outputImageBuffer.copy(inputImageBuffer);
+        console.log("image brightness adjustment is completed")
+    }catch(err){
+        console.log("Error occured while converting image to brightness Adjustment");
+        console.log("Error : ", err);
+        throw err;
+    }
+}
+
+
+//writing function to implement image filteration(Blur)
+async function blurImage(inputImageBuffer, blurLevel){
+    try{
+        const outputImageBuffer = await sharp(inputImageBuffer).blur(blurLevel).toBuffer();
+        outputImageBuffer.copy(inputImageBuffer);
+        console.log("image blur is completed");
+    }
+    catch(err){
+        console.log("Error occured while converting image to blur");
+        console.log("Error : ", err);
+        throw err;
+    }
+}
+
+
+//writing function to implement image filteration(edge detection)
+
+
+
+console.log("ello heheheh")
+
+//bellow this point all function are used for testing purpose
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+
+//mainFunction(inputImageBuffer, filepath);
+
+async function mainFunction(inputImageBuffer, filepath){
+    //below this point all the filteration function are tested
+
+    // await grayScaleConvertion(inputImageBuffer);
+    // await brightnessAjdustment(inputImageBuffer, brightnessLevel);
+    
+    
+    
+    
+    
+    //testing brightness adjustment for different levels thus making below variable
+    const brightnessLevel = 0.5;
+    //testing blur for different levels thus making below variable
+    const blurLevel = 4;
+    await blurImage(inputImageBuffer, blurLevel);
+
+    saveImage(inputImageBuffer, filepath, "outputImage");
+}
