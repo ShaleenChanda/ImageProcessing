@@ -1,6 +1,133 @@
+const express = require('express');
+const app = express();
 const sharp = require('sharp');
 const fs = require('fs');
 const imageBase64 = require('./imagedata.js')
+const bodyParser = require('body-parser');
+
+
+
+//below this point all the middleware are defined--------------------------------//
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+
+
+//---------------------------------------------------------------------------------------------------------------------//
+//below this point all the routes are defined
+
+app.post('/editImage', async (req, res) => {
+
+    //converting base64 image to buffer
+    console.log("we have a request brothers let do it yeyeyey");
+    let inputImageBuffer = Buffer.from(req.body.imageBase64, 'base64');
+    let filteration = req.body.filteration;
+    let transformation = req.body.transformation;
+
+    //handling error while processing the image
+    let error = false;
+
+
+    for(let i = 0; i < filteration.length; i++){
+        const filterationInfo = filteration[i];
+        console.log(filterationInfo);
+        await editImageFilteration(inputImageBuffer, filterationInfo, error);
+    }
+
+    for(let i =0; i < transformation.length; i++){
+        const transformationInfo = transformation[i];
+        console.log(transformationInfo);
+        await editImageTransformation(inputImageBuffer, transformationInfo, error);
+    }
+
+    console.log("bros we are done with editing the image, now I am going to send this image to backend, and then we will chill")
+
+    if(error === false){
+        //using this to handle testing incoming image
+        saveImage(inputImageBuffer, "./images", "editedImage")
+        const outputImageBuffer = inputImageBuffer.toString('base64');
+        res.status(200).json({imageData : outputImageBuffer});
+    }else{
+        res.status(500).json({message : "Error occured while editing the image"});
+    }
+    
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------//
+
+//here we are defining a function that will process the req and will work on editing(filteration only) the image
+async function editImageFilteration(inputImageBuffer, filterationInfo, error) {
+    try {
+        if (filterationInfo.filter == "grayscale") {
+            await grayScaleConversion(inputImageBuffer);
+            console.log("Image grayscale conversion is completed");
+            //console.log(filterationInfo.filterInfo)
+            error = false;
+        }
+        if(filterationInfo.filter == "brightness"){
+            await brightnessAjdustment(inputImageBuffer, filterationInfo.filterInfo);
+            console.log("Image brightness adjustment is completed");
+            error = false;
+        }
+        if(filterationInfo.filter == "blur"){
+            await blurImage(inputImageBuffer, filterationInfo.filterInfo);
+            console.log("Image blur is completed");
+            error = false;
+        }
+    } catch (err) {
+        // Handle the error or propagate it up the call stack
+        console.error("Error occurred while editing the image:", err);
+        error = true;
+        throw err;
+    }
+}
+
+
+async function editImageTransformation(inputImageBuffer, transformationInfo, error){
+    try{
+        if(transformationInfo.operation == "resize"){
+            await resizeImage(inputImageBuffer, transformationInfo.width, transformationInfo.height);
+            console.log("Image resize is completed");
+            error = false;
+        }
+        if(transformationInfo.operation == "rotate"){
+            await rotateImage(inputImageBuffer, transformationInfo.angle);
+            console.log("Image rotate is completed");
+            error = false;
+        }
+        if(transformationInfo.operation == "crop"){
+            await cropImage(inputImageBuffer, transformationInfo.info);
+            console.log("Image crop is completed");
+            error = false;
+        }
+    }catch(err){
+        //handle the error or propagate it up the call stack
+        console.log("Error occured while editing the image");
+        console.log("Error : ", err);
+        error = true;
+        throw err;
+    }
+}
+
+
+
+
+
 
 
 //converting base64 image to buffer
@@ -8,11 +135,7 @@ let inputImageBuffer = Buffer.from(imageBase64, 'base64');
 const filepath = "./images";
 
 
-//defining important variables for edgeDetection
-const options = {
-    lowThreshold: 10,  // Lower threshold for edge detection
-    highThreshold: 50, // Higher threshold for edge detection
-};
+
 
 //function to saving data from buffer to folder
 function saveImage(inputImageBuffer, filepath, filename){
@@ -28,7 +151,7 @@ function saveImage(inputImageBuffer, filepath, filename){
 
 
 //writing function to implement image filteration(grayscale conversion)
-async function grayScaleConvertion(inputImageBuffer) {
+async function grayScaleConversion(inputImageBuffer) {
     try{
         const outputImageBuffer = await sharp(inputImageBuffer).grayscale().toBuffer();
         outputImageBuffer.copy(inputImageBuffer);
@@ -181,3 +304,13 @@ async function mainFunction(inputImageBuffer, filepath){
 
     saveImage(inputImageBuffer, filepath, "outputImage");
 }
+
+
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------//
+//below this point all port listening is setup
+
+app.listen(3000, () => {
+    console.log("Server is listening on port 3000");
+});
