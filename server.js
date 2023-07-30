@@ -30,8 +30,11 @@ app.get('/', (req, res) => {
 app.post('/editImage', async(req, res) => {
 
     //converting base64 image to buffer
+    //console.log(req.body);
     console.log("we have a request brothers let do it yeyeyey");
-    let inputImageBuffer = Buffer.from(req.body.imageBase64, 'base64');
+    const base64ImageData = req.body.imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    //console.log(base64ImageData)
+    let inputImageBuffer = Buffer.from(base64ImageData, 'base64');
     let filteration = req.body.filteration;
     let transformation = req.body.transformation;
 
