@@ -1,6 +1,7 @@
 let inputImageBase64; // Buffer of the input image
 let filteration = [];
 let transformation = [];
+let editedImage;
 
 // Writing a function that will wait to load all the DOM elements before executing the code
 document.addEventListener("DOMContentLoaded", function() {
@@ -296,7 +297,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    const editedImage = document.getElementById("editedImage");
+    editedImage = document.getElementById("editedImage");
     const editButton = document.getElementById("edit-button");
 
     editButton.addEventListener("click", function() {
@@ -339,21 +340,56 @@ document.addEventListener("DOMContentLoaded", function(){
 
                 // Update the edited image with the received base64 response
                 const editedImage = document.getElementById("editedImage");
+
                 editedImage.src = "data:image/jpeg;base64," + editedBase64;
             } else {
                 console.error("Invalid response from the backend.");
             }
         })
         .catch(error => console.error("Error is occuring on frontend: ", error));
-    })
+    });
+    
 })
 
 
 
 
+document.addEventListener("DOMContentLoaded", function() {
+    const downloadButton = document.getElementById("download-button");
+    
+    let imageLoaded = false;
 
+    // Add a load event listener to the editedImage
+    editedImage.addEventListener("load", function() {
+        imageLoaded = true;
+    });
 
+    // Add the click event listener for the download button
+    downloadButton.addEventListener("click", function() {
+        // Check if the image is empty or still loading
+        if (!editedImage.src || !imageLoaded) {
+            alert("Please edit an image before downloading.");
+            return;
+        }
 
+        // Get the data URL of the edited image
+        const editedBase64 = editedImage.src;
 
+        // Create a download link for the edited image
+        const downloadLink = document.createElement("a");
+        downloadLink.href = editedBase64;
+        downloadLink.download = "editedImage.jpeg";
+        downloadLink.style.display = "none";
 
+        // Add the download link to the document body
+        document.body.appendChild(downloadLink);
 
+        // Trigger a click event on the download link to initiate the download
+        downloadLink.click();
+
+        // Remove the download link from the document body after the download is initiated
+        document.body.removeChild(downloadLink);
+    });
+
+    console.log("Download button event listener added");
+});
