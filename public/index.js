@@ -1,7 +1,7 @@
-let inputImageBase64; // Buffer of the input image
-let filteration = [];
-let transformation = [];
-let editedImage;
+let inputImageBase64; // Buffer for the input image
+let filteration = []; //creating filteration array to store information about filters to be applied on the image
+let transformation = []; //creating transformation array to store information about transformations to be applied on the image
+let editedImage; //creating a variable to store the editedImage instance
 
 // Writing a function that will wait to load all the DOM elements before executing the code
 document.addEventListener("DOMContentLoaded", function() {
@@ -15,11 +15,13 @@ document.addEventListener("DOMContentLoaded", function() {
       const reader = new FileReader(); // Creating a file reader
 
     reader.onload = function() {
+        //on onload of reader, we are storing the base64 string of the image in inputImageBase64 variable and setting the src of the image element
         inputImageBase64 = reader.result; // Storing the base64 string of the image
         uploadedImage.src = inputImageBase64; // Setting the src of the image element
         //console.log(inputImageBase64)
     };
-        
+
+        // Reading the file as a data URL
         reader.readAsDataURL(file); // Reading the file as a data URL
     }
 });
@@ -32,14 +34,15 @@ document.addEventListener("DOMContentLoaded", function() {
     grayscaleCheckbox.addEventListener("change", function() {
         if (grayscaleCheckbox.checked) {
             // Checkbox is checked, add the grayscale filter object to the array
+            //through this we are adding the grayscale filter object to the filteration array that can be send to backend in form of json
+            
             filteration.push({ "filter": "grayscale" });
         } else {
             // Checkbox is unchecked, remove the grayscale filter object from the array (if it exists)
             filteration = filteration.filter(filter => filter.filter !== "grayscale");
         }
 
-        // You can do something with the updated filteration array here, like sending it to the backend
-       // console.log(filteration);
+
     });
 });
 
@@ -60,10 +63,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function updateFilterationArray() {
       // Check if the checkbox is checked
-        const isChecked = blurCheckbox.checked;
-        const blurValue = parseFloat(blurValueInput.value);
+        const isChecked = blurCheckbox.checked; //returns true if checked else false
+        const blurValue = parseFloat(blurValueInput.value); // Converting the string value to a number
 
       // Find the index of the existing "Blur" filter object in the array
+      //if the filteration array contains the blur filter object then it will return the index of the blur filter object else it will return -1
+      //reason of using findIndex is that we want to update the value of blur filter object if it already exists in the array
         const blurFilterIndex = filteration.findIndex(
             (filter) => filter.filter === "blur"
     );
@@ -71,6 +76,8 @@ document.addEventListener("DOMContentLoaded", function() {
         if (isChecked) {
         // If checkbox is checked and "Blur" filter object exists, update its value
         if (blurFilterIndex !== -1) {
+            //if the blur filter object exists in the array then we will update the value of blur filter object
+            // we are updating the value of blur filter object in the filteration array
             filteration[blurFilterIndex].filterInfo = blurValue;
         } else {
           // If "Blur" filter object doesn't exist, add it to the array
@@ -83,8 +90,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-      // You can do something with the updated filteration array here, like sending it to the backend
-        console.log(filteration);
+
     }
     });
 
@@ -107,10 +113,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function updateFilterationArray() {
     // Check if the checkbox is checked
-        const isChecked = brightnessCheckbox.checked;
+        
+        const isChecked = brightnessCheckbox.checked; //returns true if checked else false, it is checking if the checkbox is checked or not for brightness filter
         const brightnessValue = parseFloat(brightnessValueInput.value);
 
     // Find the index of the existing "Brightness" filter object in the array
+    //if the filteration array contains the brightness filter object then it will return the index of the brightness filter object else it will return -1
+    //reason of using findIndex is that we want to update the value of brightness filter object if it already exists in the array
         const brightnessFilterIndex = filteration.findIndex(
             (filter) => filter.filter === "brightness"
         );
@@ -130,8 +139,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // You can do something with the updated filteration array here, like sending it to the backend
-    console.log(filteration);
+    //console.log(filteration);
 }
 });
 
@@ -156,6 +164,7 @@ document.addEventListener("DOMContentLoaded", function() {
       // Check if the checkbox is checked
         const isChecked = cropCheckbox.checked;
 
+        // Check if the checkbox is checked
         if (isChecked) {
         // Get the values from the input elements
         const leftPercentage = parseFloat(cropInputs[0].value) / 100;
@@ -165,12 +174,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Construct the crop transformation object
         const cropObject = {
-            "operation": "crop",
+            "operation": "crop", // storing the value of operation in the object that will be sent to backend for processing
             "info": {
-            "leftPercentage": leftPercentage,
-            "topPercentage": topPercentage,
-            "widthPercentage": widthPercentage,
-            "heightPercentage": heightPercentage
+            "leftPercentage": leftPercentage, // storing the value of left percentage in the crop object
+            "topPercentage": topPercentage, // storing the value of top percentage in the crop object
+            "widthPercentage": widthPercentage, // storing the value of width percentage in the crop object
+            "heightPercentage": heightPercentage // storing the value of height percentage in the crop object
         }
         };
         const cropObjectIndex = transformation.findIndex((trans) => trans.operation === "crop");
@@ -185,8 +194,6 @@ document.addEventListener("DOMContentLoaded", function() {
         transformation = transformation.filter((trans) => trans.operation !== "crop");
         }
 
-      // You can do something with the updated transformation array here, like sending it to the backend
-        console.log(transformation);
     }
 });
 
@@ -216,21 +223,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (isChecked) {
         // Get the values from the input elements
-        const width = parseInt(resizeWidthInput.value);
-        const height = parseInt(resizeHeightInput.value);
+        const width = parseInt(resizeWidthInput.value); //parseInt converts the string to integer
+        const height = parseInt(resizeHeightInput.value); //parseInt converts the string to integer
 
         // Construct the resize transformation object
         const resizeObject = {
-            "operation": "resize",
-            "width": width,
-            "height": height
+            "operation": "resize", // storing the value of operation in the object that will be sent to backend for processing
+            "width": width, // storing the value of width in the resize object
+            "height": height // storing the value of height in the resize object
         };
 
         const resizeObjectIndex = transformation.findIndex((trans) => trans.operation === "resize");
         // Add the resize transformation object to the transformation array
         if(resizeObjectIndex !== -1){
+            //if the resize object already exists in the transformation array then update the value of the resize object
             transformation[resizeObjectIndex] = resizeObject;
         }else{
+            //if the resize object does not exist in the transformation array then add the resize object to the transformation array
             transformation.push(resizeObject);
         }
         } else {
@@ -238,8 +247,7 @@ document.addEventListener("DOMContentLoaded", function() {
         transformation = transformation.filter((trans) => trans.operation !== "resize");
         }
 
-      // You can do something with the updated transformation array here, like sending it to the backend
-        console.log(transformation);
+
     }
 });
 
@@ -273,15 +281,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Construct the resize transformation object
         const rotateObject = {
-            "operation": "rotate",
-            "angle" : angle
+            "operation": "rotate", // storing the value of operation in the object that will be sent to backend for processing
+            "angle" : angle // storing the value of angle in the rotate object
         };
 
         const rotateObjectIndex = transformation.findIndex((trans) => trans.operation === "rotate");
         // Add the resize transformation object to the transformation array
         if(rotateObjectIndex !== -1){
+            //if the resize object already exists in the transformation array then update the value of the resize object
             transformation[rotateObjectIndex] = rotateObject;
         }else{
+            //if the resize object does not exist in the transformation array then add the resize object to the transformation array
             transformation.push(rotateObject);
         }
         } else {
@@ -289,8 +299,7 @@ document.addEventListener("DOMContentLoaded", function() {
         transformation = transformation.filter((trans) => trans.operation !== "rotate");
         }
 
-      // You can do something with the updated transformation array here, like sending it to the backend
-        console.log(transformation);
+
     }
 });
 
@@ -303,35 +312,54 @@ document.addEventListener("DOMContentLoaded", function(){
     editButton.addEventListener("click", function() {
         // Check if the image is empty
         if (!inputImageBase64) {
-            alert("Please upload an image before editing.");
+            alert("Please upload an image before editing."); //an alret will be shown if the image is empty
             return;
         }
 
         // Check if both filteration and transformation arrays are empty
         if (filteration.length === 0 && transformation.length === 0) {
-            alert("Please apply at least one filter or transformation before editing.");
+            alert("Please apply at least one filter or transformation before editing."); //an alret will be shown if both filteration and transformation arrays are empty
             return;
         }
 
+        // Construct the image data object that will be sent to the backend, in this object we will store the base64 image data, filteration array and transformation array
+        //filteration array will be used to store the filteration objects such as blur, grayscale, blur and edge detection it will store the value of the filteration that is to be applied on the image
+        //filteration array will have the following structure example is given below
 
+
+        //filteration = [
+        //     {
+        //         "operation": "blur", storing the value of operation in the object that will be sent to backend for processing
+        //         "value": 5  storing the information that will passed onto the backend for processing
+        //     },
+
+
+        //transformation array will be used to store the transformation objects such as crop, resize, rotate it will store the value of the transformation that is to be applied on the image
+        //transformation array will have the following structure example is given below
+        //transformation = [
+        //     {
+        //         "operation": "resize", storing the value of operation in the object that will be sent to backend for processing
+        //         "width": 500, storing the information that will passed onto the backend for processing
+        //         "height": 500 storing the information that will passed onto the backend for processing
+        //     }
         const imageData = {
             imageBase64: inputImageBase64,
             filteration: filteration,
             transformation: transformation
         };
 
-        const url = "https://image-processing-automation.onrender.com/editImage";
+        const url = "https://image-processing-automation.onrender.com/editImage"; //url of the backend on which the request will be sent
         const options = {
-            method: "POST",
+            method: "POST", //method of the request POST request is usually used to send image data to backend to handle
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(imageData)
+            body: JSON.stringify(imageData) //body of the request will contain the image data that is to be sent to the backend
         };
 
 
-        fetch(url, options)
-        .then(response => response.json())
+        fetch(url, options) //fetch is used to send the request to the backend
+        .then(response => response.json()) //response from the backend is converted to json format
         .then(data => {
             // Handle the response from the backend
             if (data && data.imageData) {
@@ -357,7 +385,7 @@ document.addEventListener("DOMContentLoaded", function(){
 document.addEventListener("DOMContentLoaded", function() {
     const downloadButton = document.getElementById("download-button");
     
-    let imageLoaded = false;
+    let imageLoaded = false; //variable to check if the image is loaded or not
 
     // Add a load event listener to the editedImage
     editedImage.addEventListener("load", function() {
