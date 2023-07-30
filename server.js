@@ -5,7 +5,11 @@ const fs = require('fs');
 const imageBase64 = require('./imagedata.js')
 const bodyParser = require('body-parser');
 
+//defining view engine and views folder
+app.set('view engine', 'ejs');
 
+//setting up static folder
+app.use(express.static('public'));
 
 //below this point all the middleware are defined--------------------------------//
 app.use(bodyParser.json({limit: '50mb'}));
@@ -15,7 +19,15 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 //---------------------------------------------------------------------------------------------------------------------//
 //below this point all the routes are defined
 
-app.post('/editImage', async (req, res) => {
+app.get('/', (req, res) => {
+    console.log("we are rendering the index page")
+    res.render('index');
+});
+
+
+
+
+app.post('/editImage', async(req, res) => {
 
     //converting base64 image to buffer
     console.log("we have a request brothers let do it yeyeyey");
@@ -39,11 +51,11 @@ app.post('/editImage', async (req, res) => {
         await editImageTransformation(inputImageBuffer, transformationInfo, error);
     }
 
-    console.log("bros we are done with editing the image, now I am going to send this image to backend, and then we will chill")
+    console.log("bros we are done with editing the image, now I am going to send this image to frontend, and then we will chill")
 
     if(error === false){
         //using this to handle testing incoming image
-        saveImage(inputImageBuffer, "./images", "editedImage")
+        //saveImage(inputImageBuffer, "./images", "editedImage")
         const outputImageBuffer = inputImageBuffer.toString('base64');
         res.status(200).json({imageData : outputImageBuffer});
     }else{
