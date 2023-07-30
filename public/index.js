@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function(){
             transformation: transformation
         };
 
-        const url = "http://localhost:3000/editImage";
+        const url = "https://image-processing-automation.onrender.com//editImage";
         const options = {
             method: "POST",
             headers: {
